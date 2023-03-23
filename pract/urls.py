@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-from pract.views import WorkoutListView
+
+# from pract.views import WorkoutListView
 
 urlpatterns = [
     path("return_client_info/", views.return_client_info, name="return_client_info"),
@@ -19,6 +20,11 @@ urlpatterns = [
         "return_schedule_info/",
         views.return_schedule_info,
         name="return_schedule_info",
+    ),
+    path(
+        "return_news/",
+        views.return_news,
+        name="return_news",
     ),
     path(
         "add_client/",
@@ -40,5 +46,20 @@ urlpatterns = [
         views.add_activity,
         name="add_activity",
     ),
-    path("return_workouts/", WorkoutListView.as_view(), name="pract-workout-list"),
+    path("return_workouts/", views.return_workouts, name="return_workouts"),
+    path(
+        "return_selected_workouts/<int:year>/<int:month>",
+        views.return_selected_workouts,
+        name="return_selected_workouts",
+    ),
+    path(
+        "return_workout_years",
+        views.return_workout_years,
+        name="return_workout_years",
+    ),
+    path(
+        "return_workout_months/<int:year>",
+        views.return_workout_months,
+        name="return_workout_months",
+    ),
 ]

@@ -80,14 +80,16 @@ class Workouts(models.Model):
     id = models.AutoField(primary_key=True)
     user_id = models.IntegerField(default=0, null=True)  # TODO connect to users db
     name = models.CharField(blank=True, null=True, max_length=100)
-    date = models.DateField(null=True)
-    length = models.CharField(blank=True, null=True, max_length=100)
-    personal_hightscores_amount = models.IntegerField(default=0, null=True)  # TODO
-    # exercise_id = models.ForeignKey(
-    #     Exercises, on_delete=models.CASCADE, to_field="id", null=True, default=0
-    # )  # IntegerField(default=0, null=True)
+    # date = models.DateField(null=True)
+    year = models.IntegerField(default=2001, null=True)
+    month = models.IntegerField(default=1, null=True)
+    day = models.IntegerField(default=1, null=True)
+    length = models.IntegerField(default=1, null=True)
+    personal_highscores_amount = models.IntegerField(default=0, null=True)  # TODO
+
     class Meta:
         managed = True
+        db_table = "workouts"
 
     def __str__(self) -> str:
         return self.name

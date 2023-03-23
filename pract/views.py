@@ -3,6 +3,11 @@ from django.http import JsonResponse, HttpResponse
 from django.core import serializers
 from rest_framework import generics
 from pract.serializers import WorkoutSeializer
+from django.db.models import Q
+from rest_framework.response import Response
+from rest_framework import status
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 from pract.models import (
     Clients,
@@ -93,37 +98,6 @@ def return_news(request):
     return JsonResponse({"news": news})
 
 
-# def return_workouts(request):
-#     # return JsonResponse(Workouts.objects.prefetch_related("exercises"), safe=False)
-#     return JsonResponse(
-#         serializers.serialize("json", Workouts.objects.prefetch_related("exercises")),
-#         safe=False,
-#     )
-
-
-# def add_workout(request):
-#     workout = Workouts(
-#         user_id=request.POST["user_id"],
-#         name=request.POST["name"],
-#         date=request.POST["date"],
-#         length=request.POST["length"],
-#         personal_highscores=request.POST["personal_highscores"],
-#         exercises=Exercises.objects.get(id=request.POST["exercises"]),
-#     )
-#     workout.save()
-#     return HttpResponse()
-
-
-# def add_exercise(request):
-#     exercise = Exercises(
-#         name=request.POST["name"],
-#         weight=request.POST["weight"],
-#         reps=request.POST["reps"],
-#     )
-#     exercise.save()
-#     return HttpResponse()
-
-
 def add_client(request):
     client = Clients(
         name=request.POST["name"],
@@ -199,6 +173,67 @@ def add_activity(request):
     return HttpResponse()
 
 
-class WorkoutListView(generics.ListAPIView):
-    queryset = Workouts.objects.prefetch_related("exercises")
-    serializer_class = WorkoutSeializer
+# class WorkoutListView(generics.ListAPIView):
+#     queryset = Workouts.objects.prefetch_related("exercises")
+#     serializer_class = WorkoutSeializer
+
+
+def return_selected_workouts(request, year, month):
+    if request.method == "GET":
+
+        try:
+            # workouts = Workouts.objects.filter(
+            #     Q(date__year=year) & Q(date__month=month)
+            # )
+            workouts = (
+                Workouts.objects.filter(Q(year=year) & Q(month=month))
+                .order_by("year")
+                .order_by("month")
+                .order_by("-day")
+            )
+            serializer = WorkoutSeializer(workouts, many=True)
+            return JsonResponse({"workouts": serializer.data}, safe=False)
+        except Workouts.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        # workouts = Workouts.objects.all()
+
+
+def return_workouts(request):
+    workouts = Workouts.objects.all()
+    serializer = WorkoutSeializer(workouts, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+
+def return_workout_years(request):
+    try:
+        years = list(
+            map(
+                lambda d: d["year"],
+                list(
+                    Workouts.objects.order_by().values("year").distinct().values("year")
+                ),
+            )
+        )
+        # years.reverse()
+        return JsonResponse({"years": years})
+    except Workouts.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+def return_workout_months(request, year):
+    months = list(
+        map(
+            lambda d: d["month"],
+            list(
+                Workouts.objects.filter(Q(year=year))
+                .order_by("month")
+                .distinct()
+                .values("month")
+            ),
+        )
+    )
+    months.reverse()
+
+    print(months)
+    return JsonResponse({"months": months})

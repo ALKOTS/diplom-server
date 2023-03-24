@@ -189,7 +189,7 @@ def return_selected_workouts(request, year, month):
                 Workouts.objects.filter(Q(year=year) & Q(month=month))
                 .order_by("year")
                 .order_by("month")
-                .order_by("-day")
+                .order_by("day")
             )
             serializer = WorkoutSeializer(workouts, many=True)
             return JsonResponse({"workouts": serializer.data}, safe=False)

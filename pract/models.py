@@ -83,9 +83,11 @@ class Workouts(models.Model):
     # date = models.DateField(null=True)
     year = models.IntegerField(default=2001, null=True)
     month = models.IntegerField(default=1, null=True)
-    day = models.IntegerField(default=1, null=True)
-    length = models.IntegerField(default=1, null=True)
-    personal_highscores_amount = models.IntegerField(default=0, null=True)  # TODO
+    day = models.CharField(default=1, null=True, max_length=100)
+    length = models.CharField(default=1, null=True, max_length=100)
+    personal_highscores_amount = models.CharField(
+        default=0, null=True, max_length=100
+    )  # TODO
 
     class Meta:
         managed = True
@@ -98,8 +100,8 @@ class Workouts(models.Model):
 class Exercises(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(blank=True, null=True, max_length=100)
-    weight = models.IntegerField(default=0, null=True)
-    reps = models.IntegerField(default=0, null=True)
+    weight = models.CharField(default=0, null=True, max_length=100)
+    reps = models.CharField(default=0, null=True, max_length=100)
     workout_id = models.ForeignKey(
         Workouts,
         on_delete=models.CASCADE,

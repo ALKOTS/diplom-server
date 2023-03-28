@@ -68,8 +68,10 @@ class Schedule(models.Model):
 class News(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(blank=True, null=True, max_length=100)
+    sub_title = models.CharField(blank=True, null=True, max_length=100)
     text = models.CharField(blank=True, null=True, max_length=500)
     date = models.DateField(blank=True, null=True)
+    post_url = models.CharField(blank=True, null=True, max_length=100)
 
     class Meta:
         managed = True

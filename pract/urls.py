@@ -42,6 +42,11 @@ urlpatterns = [
         name="add_trainer",
     ),
     path(
+        "add_news/",
+        views.add_news,
+        name="add_news",
+    ),
+    path(
         "add_activity/",
         views.add_activity,
         name="add_activity",

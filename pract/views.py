@@ -90,9 +90,11 @@ def return_news(request):
     for c in News.objects.all():
         news.append(
             {
-                "name": c.title,
+                "title": c.title,
+                "sub_title": c.sub_title,
                 "text": c.text,
                 "date": c.date,
+                "post_url": c.post_url,
             }
         )
     return JsonResponse({"news": news})
@@ -123,8 +125,10 @@ def add_schedule(request):
 def add_news(request):
     news = News(
         title=request.POST["title"],
+        sub_title=request.POST["sub_title"],
         text=request.POST["text"],
         date=request.POST["date"],
+        post_url=request.POST["post_url"],
     )
     news.save()
     return HttpResponse()

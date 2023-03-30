@@ -26,6 +26,16 @@ urlpatterns = [
         views.return_news,
         name="return_news",
     ),
+    # path(
+    #     "return_news/<int:year>/<int:month>",
+    #     views.return_news_month,
+    #     name="return_news_month",
+    # ),
+    path(
+        "return_news/<int:since>",
+        views.return_news_month,
+        name="return_news_month",
+    ),
     path(
         "add_client/",
         views.add_client,
@@ -53,7 +63,7 @@ urlpatterns = [
     ),
     path("return_workouts/", views.return_workouts, name="return_workouts"),
     path(
-        "return_selected_workouts/<int:year>/<int:month>",
+        "return_workouts/<int:year>/<int:month>",
         views.return_selected_workouts,
         name="return_selected_workouts",
     ),

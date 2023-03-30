@@ -100,6 +100,25 @@ def return_news(request):
     return JsonResponse({"news": news})
 
 
+# def return_news_month(request, year, month):
+def return_news_month(request, since):
+    news = []
+    for c in News.objects.all().order_by("-id")[since : since + 10 : -1]:
+        # for c in News.objects.filter(Q(date__year=year) & Q(date__month=month)):
+        news.append(
+            {
+                "title": c.title,
+                "sub_title": c.sub_title,
+                "text": c.text,
+                "date": c.date,
+                "post_url": c.post_url,
+            }
+        )
+    news = news[::-1]
+
+    return JsonResponse({"news": news})
+
+
 def add_client(request):
     client = Clients(
         name=request.POST["name"],

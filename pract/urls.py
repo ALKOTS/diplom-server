@@ -1,15 +1,17 @@
 from django.urls import path
 from . import views
+from rest_framework.authtoken.views import obtain_auth_token
 
 # from pract.views import WorkoutListView
 
 urlpatterns = [
     path("return_client_info/", views.return_client_info, name="return_client_info"),
     # path("admin"),
+    path("login/", obtain_auth_token, name="obtain-auth-token"),
     path(
-        "return_activities_info/",
-        views.return_activities_info,
-        name="return_activities_info",
+        "return_activities/",
+        views.return_activities,
+        name="return_activities",
     ),
     path(
         "return_trainer_info/",
@@ -62,6 +64,7 @@ urlpatterns = [
         name="add_activity",
     ),
     path("return_workouts/", views.return_workouts, name="return_workouts"),
+    # path("return_workouts/", views.ReturnWorkouts.get, name="return_workouts"),
     path(
         "return_workouts/<int:year>/<int:month>",
         views.return_selected_workouts,

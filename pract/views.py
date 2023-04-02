@@ -1,8 +1,13 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.core import serializers
-from rest_framework import generics
-from pract.serializers import WorkoutSeializer
+from rest_framework import generics, authentication
+from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
+from rest_framework.decorators import permission_classes, api_view
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from pract.serializers import WorkoutSeializer, ActivitySerializer
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
@@ -33,28 +38,10 @@ def return_client_info(request):
     return JsonResponse({"client": clients})
 
 
-def return_activities_info(request):
-    activities = []
-    # Clients.objects.raw("SELECT * FROM activities", translations=name_map)
-    for c in Activities.objects.raw("SELECT * FROM activities"):
-        activities.append(
-            {
-                "name": c.name,
-                "beginner_friendly": c.beginner_friendly,
-                "crossfit": c.crossfit,
-                "general_workout": c.general_workout,
-                "cardio": c.cardio,
-                "legs": c.legs,
-                "chest": c.chest,
-                "shoulders": c.shoulders,
-                "biceps": c.biceps,
-                "triceps": c.triceps,
-                "is_group": c.is_group,
-                "is_competition": c.is_competition,
-            }
-        )
-
-    return JsonResponse({"activity": activities})
+def return_activities(request):
+    activities = Activities.objects.all()
+    serializer = ActivitySerializer(activities, many=True)
+    return JsonResponse(serializer.data, safe=False)
 
 
 def return_trainer_info(request):
@@ -201,15 +188,20 @@ def add_activity(request):
 #     serializer_class = WorkoutSeializer
 
 
+def return_workouts_basic(request):
+    workouts = Workouts.objects.filter(user=request.user)
+    return workouts
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def return_selected_workouts(request, year, month):
     if request.method == "GET":
-
         try:
-            # workouts = Workouts.objects.filter(
-            #     Q(date__year=year) & Q(date__month=month)
-            # )
             workouts = (
-                Workouts.objects.filter(Q(year=year) & Q(month=month))
+                return_workouts_basic(request)
+                .filter(Q(year=year) & Q(month=month))
+                # Workouts.objects.filter(Q(year=year) & Q(month=month))
                 .order_by("year")
                 .order_by("month")
                 .order_by("day")
@@ -222,19 +214,31 @@ def return_selected_workouts(request, year, month):
         # workouts = Workouts.objects.all()
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def return_workouts(request):
-    workouts = Workouts.objects.all()
+    # workouts = Workouts.objects.filter(user=request.user)
+    # print(request.user)
+    workouts = return_workouts_basic(request)  # Workouts.objects.all()
     serializer = WorkoutSeializer(workouts, many=True)
     return JsonResponse(serializer.data, safe=False)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def return_workout_years(request):
     try:
         years = list(
             map(
                 lambda d: d["year"],
                 list(
-                    Workouts.objects.order_by().values("year").distinct().values("year")
+                    return_workouts_basic(request)
+                    .order_by()
+                    .values("year")
+                    .distinct()
+                    .values(
+                        "year"
+                    )  # Workouts.objects.order_by().values("year").distinct().values("year")
                 ),
             )
         )
@@ -244,12 +248,15 @@ def return_workout_years(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def return_workout_months(request, year):
     months = list(
         map(
             lambda d: d["month"],
             list(
-                Workouts.objects.filter(Q(year=year))
+                return_workouts_basic(request)
+                .filter(Q(year=year))  # Workouts.objects.filter(Q(year=year))
                 .order_by("month")
                 .distinct()
                 .values("month")

@@ -1,8 +1,16 @@
 from rest_framework import serializers
-from pract.models import Workouts, Exercises
+from pract.models import Workouts, Exercises, Activities
+
+
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activities
+        fields = "__all__"
 
 
 class ExerciseSerializer(serializers.ModelSerializer):
+    activity = ActivitySerializer(many=False)
+
     class Meta:
         model = Exercises
         fields = "__all__"

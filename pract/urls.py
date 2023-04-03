@@ -8,6 +8,7 @@ urlpatterns = [
     path("return_client_info/", views.return_client_info, name="return_client_info"),
     # path("admin"),
     path("login/", obtain_auth_token, name="obtain-auth-token"),
+    path("register/", views.register, name="register"),
     path(
         "return_activities/",
         views.return_activities,
@@ -28,11 +29,6 @@ urlpatterns = [
         views.return_news,
         name="return_news",
     ),
-    # path(
-    #     "return_news/<int:year>/<int:month>",
-    #     views.return_news_month,
-    #     name="return_news_month",
-    # ),
     path(
         "return_news/<int:since>",
         views.return_news_month,

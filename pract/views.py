@@ -2,12 +2,22 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.core import serializers
 from rest_framework import generics, authentication
-from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import (
+    BasePermission,
+    AllowAny,
+    IsAuthenticated,
+    SAFE_METHODS,
+)
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from pract.serializers import WorkoutSeializer, ActivitySerializer, NewsSerializer
+from pract.serializers import (
+    WorkoutSeializer,
+    ActivitySerializer,
+    NewsSerializer,
+    RegistrationSerializer,
+)
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
@@ -87,22 +97,8 @@ def return_news(request):
     return JsonResponse({"news": news})
 
 
-# def return_news_month(request, year, month):
 def return_news_month(request, since):
-    # news = []
     print(since)
-    # for c in News.objects.all().order_by("-id")[since : since + 10 : -1]:
-    #     # for c in News.objects.filter(Q(date__year=year) & Q(date__month=month)):
-    #     news.append(
-    #         {
-    #             "title": c.title,
-    #             "sub_title": c.sub_title,
-    #             "text": c.text,
-    #             "date": c.date,
-    #             "post_url": c.post_url,
-    #         }
-    #     )
-    # news = news[::-1]
 
     news = News.objects.order_by("-id")[since : since + 10 : 1]
     serializer = NewsSerializer(news, many=True)
@@ -271,3 +267,21 @@ def return_workout_months(request, year):
 
     print(months)
     return JsonResponse({"months": months})
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def register(request):
+    serializer = RegistrationSerializer(data=request.data)
+    data = {}
+    if serializer.is_valid():
+        client = serializer.save()
+        data["response"] = "Success"
+        data["username"] = client.username
+
+    else:
+        data = serializer.errors
+
+    return Response(data)
+
+    # return Response(status=status.HTTP_200_OK)

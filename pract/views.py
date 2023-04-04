@@ -82,6 +82,8 @@ def return_schedule_info(request):
     return JsonResponse({"schedule": schedule})
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def return_news(request):
     news = []
     for c in News.objects.all():
@@ -97,6 +99,8 @@ def return_news(request):
     return JsonResponse({"news": news})
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def return_news_month(request, since):
     print(since)
 
@@ -277,11 +281,11 @@ def register(request):
     if serializer.is_valid():
         client = serializer.save()
         data["response"] = "Success"
-        data["username"] = client.username
 
     else:
-        data = serializer.errors
+        data = {"response": "Error", "Errors": serializer.errors}
 
-    return Response(data)
+    print(data)
+    return Response(data, status=status.HTTP_200_OK)
 
     # return Response(status=status.HTTP_200_OK)

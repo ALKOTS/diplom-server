@@ -11,6 +11,7 @@ from django.contrib.auth.models import (
     User,
     AbstractBaseUser,
     BaseUserManager,
+    PermissionsMixin,
 )
 
 
@@ -83,7 +84,7 @@ class ClientManager(BaseUserManager):
         return client
 
 
-class Clients(AbstractBaseUser):
+class Clients(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     login = models.CharField(unique=True, max_length=100, null=True)
     username = models.CharField(default="default_name", max_length=100)
@@ -98,7 +99,7 @@ class Clients(AbstractBaseUser):
 
     USERNAME_FIELD = "login"
 
-    REQUIRED_FIELDS = ["name", "last_name"]
+    REQUIRED_FIELDS = ["username", "last_name", "email"]
 
     objects = ClientManager()
 
@@ -106,17 +107,17 @@ class Clients(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.email
+        return self.login
 
     def has_perm(self, perm, obj=None):
         "Does the user have a specific permission?"
         # Simplest possible answer: Yes, always
-        return True
+        return self.is_admin  # True
 
     def has_module_perms(self, app_label):
         "Does the user have permissions to view the app `app_label`?"
         # Simplest possible answer: Yes, always
-        return True
+        return self.is_admin  # True
 
     @property
     def is_staff(self):
@@ -144,7 +145,10 @@ class Schedule(models.Model):
     date = models.DateField(blank=True, null=True)
     people_limit = models.IntegerField(blank=True, null=True)
     leader = models.ForeignKey(
-        Trainer, on_delete=models.CASCADE, to_field="id", default=1
+        Trainer,
+        on_delete=models.SET_NULL,
+        to_field="id",
+        null=True,  # default=1
     )
     activity = models.ForeignKey(
         Activities, on_delete=models.CASCADE, to_field="id", default=1
@@ -198,16 +202,15 @@ class Exercises(models.Model):
     reps = models.CharField(default=0, null=True, max_length=100)
     workout_id = models.ForeignKey(
         Workouts,
-        on_delete=models.CASCADE,
-        default=1,
+        on_delete=models.SET_NULL,
+        null=True,  # default=1,
         related_name="exercises",
     )
 
     activity = models.ForeignKey(
         Activities,
-        on_delete=models.CASCADE,
-        null=True,
-        default=1,
+        on_delete=models.SET_NULL,
+        null=True,  # default=1,
         related_name="activity",
     )
 

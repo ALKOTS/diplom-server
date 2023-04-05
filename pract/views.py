@@ -37,66 +37,57 @@ from pract.models import (
 # from models import get_clients
 
 # Create your views here.
-def return_client_info(request):
-    clients = []
-    # Clients.objects.raw("SELECT * FROM clients", translations=name_map)
-    for c in Clients.objects.raw("SELECT * FROM clients"):
-        clients.append(
-            {"name": c.name, "last_name": c.last_name, "password": c.password}
-        )
+# def return_client_info(request):
+#     clients = []
+#     # Clients.objects.raw("SELECT * FROM clients", translations=name_map)
+#     for c in Clients.objects.raw("SELECT * FROM clients"):
+#         clients.append(
+#             {"name": c.name, "last_name": c.last_name, "password": c.password}
+#         )
 
-    return JsonResponse({"client": clients})
-
-
-def return_activities(request):
-    activities = Activities.objects.all()
-    serializer = ActivitySerializer(activities, many=True)
-    return JsonResponse(serializer.data, safe=False)
+#     return JsonResponse({"client": clients})
 
 
-def return_trainer_info(request):
-    trainers = []
-    for c in Trainer.objects.all():
-        trainers.append(
-            {
-                "id": c.id,
-                "name": c.name,
-            }
-        )
-
-    return JsonResponse({"trainer": trainers})
+# def return_activities(request):
+#     activities = Activities.objects.all()
+#     serializer = ActivitySerializer(activities, many=True)
+#     return JsonResponse(serializer.data, safe=False)
 
 
-def return_schedule_info(request):
-    schedule = []
-    for c in Schedule.objects.all():
-        schedule.append(
-            {
-                "name": c.name,
-                "date": c.date,
-                "people_limit": c.people_limit,
-                "leader": str(c.leader.name),
-                "activity": str(c.activity.name),
-            }
-        )
-    return JsonResponse({"schedule": schedule})
+# def return_trainer_info(request):
+#     trainers = []
+#     for c in Trainer.objects.all():
+#         trainers.append(
+#             {
+#                 "id": c.id,
+#                 "name": c.name,
+#             }
+#         )
+
+#     return JsonResponse({"trainer": trainers})
+
+
+# def return_schedule_info(request):
+#     schedule = []
+#     for c in Schedule.objects.all():
+#         schedule.append(
+#             {
+#                 "name": c.name,
+#                 "date": c.date,
+#                 "people_limit": c.people_limit,
+#                 "leader": str(c.leader.name),
+#                 "activity": str(c.activity.name),
+#             }
+#         )
+#     return JsonResponse({"schedule": schedule})
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def return_news(request):
-    news = []
-    for c in News.objects.all():
-        news.append(
-            {
-                "title": c.title,
-                "sub_title": c.sub_title,
-                "text": c.text,
-                "date": c.date,
-                "post_url": c.post_url,
-            }
-        )
-    return JsonResponse({"news": news})
+    news = News.objects.all()
+    serializer = NewsSerializer(news, many=True)
+    return JsonResponse({"news": serializer.data})
 
 
 @api_view(["GET"])
@@ -110,86 +101,135 @@ def return_news_month(request, since):
     return JsonResponse({"news": serializer.data})
 
 
-def add_client(request):
-    client = Clients(
-        name=request.POST["name"],
-        last_name=request.POST["last_name"],
-        password=request.POST["password"],
-    )
-    client.save()
-    return HttpResponse()
+# def add_client(request):
+#     client = Clients(
+#         name=request.POST["name"],
+#         last_name=request.POST["last_name"],
+#         password=request.POST["password"],
+#     )
+#     client.save()
+#     return HttpResponse()
 
 
-def add_schedule(request):
-    schedule = Schedule(
-        name=request.POST["name"],
-        date=request.POST["date"],
-        people_limit=request.POST["people_limit"],
-        leader=Trainer.objects.get(id=request.POST["leader"]),
-        activity=Activities.objects.get(id=request.POST["activity"]),
-    )
-    schedule.save()
-    return HttpResponse()
+# def add_schedule(request):
+#     schedule = Schedule(
+#         name=request.POST["name"],
+#         date=request.POST["date"],
+#         people_limit=request.POST["people_limit"],
+#         leader=Trainer.objects.get(id=request.POST["leader"]),
+#         activity=Activities.objects.get(id=request.POST["activity"]),
+#     )
+#     schedule.save()
+#     return HttpResponse()
 
 
-def add_news(request):
-    news = News(
-        title=request.POST["title"],
-        sub_title=request.POST["sub_title"],
-        text=request.POST["text"],
-        date=request.POST["date"],
-        post_url=request.POST["post_url"],
-    )
-    news.save()
-    return HttpResponse()
+# def add_news(request):
+#     news = News(
+#         title=request.POST["title"],
+#         sub_title=request.POST["sub_title"],
+#         text=request.POST["text"],
+#         date=request.POST["date"],
+#         post_url=request.POST["post_url"],
+#     )
+#     news.save()
+#     return HttpResponse()
 
 
-def add_trainer(request):
-    trainer = Trainer(name=request.POST["name"])
-    trainer.save()
-    return HttpResponse()
+# def add_trainer(request):
+#     trainer = Trainer(name=request.POST["name"])
+#     trainer.save()
+#     return HttpResponse()
 
 
-def add_activity(request):
-    activity = Activities.objects.create(
-        name=request.POST.get("name"),
-        beginner_friendly=request.POST.get("beginner_friendly")
-        if request.POST.get("beginner_friendly") != None
-        else False,
-        crossfit=request.POST.get("crossfit")
-        if request.POST.get("crossfit") != None
-        else False,
-        general_workout=request.POST.get("general_workout")
-        if request.POST.get("general_workout") != None
-        else False,
-        cardio=request.POST.get("cardio")
-        if request.POST.get("cardio") != None
-        else False,
-        legs=request.POST.get("legs") if request.POST.get("legs") != None else False,
-        chest=request.POST.get("chest") if request.POST.get("chest") != None else False,
-        shoulders=request.POST.get("shoulders")
-        if request.POST.get("shoulders") != None
-        else False,
-        biceps=request.POST.get("biceps")
-        if request.POST.get("biceps") != None
-        else False,
-        triceps=request.POST.get("triceps")
-        if request.POST.get("triceps") != None
-        else False,
-        is_group=request.POST.get("is_group")
-        if request.POST.get("is_group") != None
-        else False,
-        is_competition=request.POST.get("is_competition")
-        if request.POST.get("is_competition") != None
-        else False,
-    )
-    activity.save()
-    return HttpResponse()
+# def add_activity(request):
+#     activity = Activities.objects.create(
+#         name=request.POST.get("name"),
+#         beginner_friendly=request.POST.get("beginner_friendly")
+#         if request.POST.get("beginner_friendly") != None
+#         else False,
+#         crossfit=request.POST.get("crossfit")
+#         if request.POST.get("crossfit") != None
+#         else False,
+#         general_workout=request.POST.get("general_workout")
+#         if request.POST.get("general_workout") != None
+#         else False,
+#         cardio=request.POST.get("cardio")
+#         if request.POST.get("cardio") != None
+#         else False,
+#         legs=request.POST.get("legs") if request.POST.get("legs") != None else False,
+#         chest=request.POST.get("chest") if request.POST.get("chest") != None else False,
+#         shoulders=request.POST.get("shoulders")
+#         if request.POST.get("shoulders") != None
+#         else False,
+#         biceps=request.POST.get("biceps")
+#         if request.POST.get("biceps") != None
+#         else False,
+#         triceps=request.POST.get("triceps")
+#         if request.POST.get("triceps") != None
+#         else False,
+#         is_group=request.POST.get("is_group")
+#         if request.POST.get("is_group") != None
+#         else False,
+#         is_competition=request.POST.get("is_competition")
+#         if request.POST.get("is_competition") != None
+#         else False,
+#     )
+#     activity.save()
+#     return HttpResponse()
 
 
 # class WorkoutListView(generics.ListAPIView):
 #     queryset = Workouts.objects.prefetch_related("exercises")
 #     serializer_class = WorkoutSeializer
+def add_exercise(exercise_list, workout_id):
+    # response = [str(Exercises.objects.get(pk=1))]
+    for exercise in exercise_list:
+        # print(exercise)
+        Exercises(
+            weight=exercise["weight"],
+            reps=exercise["reps"],
+            workout_id=Workouts.objects.get(pk=workout_id),
+            activity=Activities.objects.get(pk=exercise["activity"]),
+        ).save()
+    return HttpResponse()
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_workout(request):
+    # print(request.data)
+    year, month, day = request.data["date"].split("/")
+    workout = Workouts(
+        user=request.user,
+        name=request.data["name"],
+        year=year,
+        month=month,
+        day=day,
+        length=request.data["length"],
+        personal_highscores_amount=0,
+    )
+    workout.save()
+    add_exercise(
+        request.data["exercises"],
+        workout.id,
+    )
+    return HttpResponse()
+
+
+# Response(data={"response": workout.id}, status=status.HTTP_200_OK)
+
+
+def return_activities():
+    activities = Activities.objects.all()
+    return activities
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def return_exercise_activities(request):
+    activities = return_activities().filter(Q(is_exercise=True))
+    serializer = ActivitySerializer(activities, many=True)
+    return JsonResponse({"response": serializer.data})
 
 
 def return_workouts_basic(request):
@@ -268,8 +308,6 @@ def return_workout_months(request, year):
         )
     )
     months.reverse()
-
-    print(months)
     return JsonResponse({"months": months})
 
 

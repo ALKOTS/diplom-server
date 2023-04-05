@@ -6,6 +6,7 @@ from rest_framework.permissions import (
     BasePermission,
     AllowAny,
     IsAuthenticated,
+    IsAdminUser,
     SAFE_METHODS,
 )
 from rest_framework.decorators import permission_classes, api_view
@@ -141,50 +142,33 @@ def return_news_month(request, since):
 #     return HttpResponse()
 
 
-# def add_activity(request):
-#     activity = Activities.objects.create(
-#         name=request.POST.get("name"),
-#         beginner_friendly=request.POST.get("beginner_friendly")
-#         if request.POST.get("beginner_friendly") != None
-#         else False,
-#         crossfit=request.POST.get("crossfit")
-#         if request.POST.get("crossfit") != None
-#         else False,
-#         general_workout=request.POST.get("general_workout")
-#         if request.POST.get("general_workout") != None
-#         else False,
-#         cardio=request.POST.get("cardio")
-#         if request.POST.get("cardio") != None
-#         else False,
-#         legs=request.POST.get("legs") if request.POST.get("legs") != None else False,
-#         chest=request.POST.get("chest") if request.POST.get("chest") != None else False,
-#         shoulders=request.POST.get("shoulders")
-#         if request.POST.get("shoulders") != None
-#         else False,
-#         biceps=request.POST.get("biceps")
-#         if request.POST.get("biceps") != None
-#         else False,
-#         triceps=request.POST.get("triceps")
-#         if request.POST.get("triceps") != None
-#         else False,
-#         is_group=request.POST.get("is_group")
-#         if request.POST.get("is_group") != None
-#         else False,
-#         is_competition=request.POST.get("is_competition")
-#         if request.POST.get("is_competition") != None
-#         else False,
-#     )
-#     activity.save()
-#     return HttpResponse()
+@api_view(["POST"])
+@permission_classes([IsAdminUser])
+def add_activity(request):
+    activity = Activities.objects.create(
+        name=request.POST.get("name"),
+        beginner_friendly=request.POST.get("beginner_friendly"),
+        crossfit=request.POST.get("crossfit"),
+        general_workout=request.POST.get("general_workout"),
+        cardio=request.POST.get("cardio"),
+        legs=request.POST.get("legs"),
+        chest=request.POST.get("chest"),
+        shoulders=request.POST.get("shoulders"),
+        biceps=request.POST.get("biceps"),
+        triceps=request.POST.get("triceps"),
+        is_group=request.POST.get("is_group"),
+        is_competition=request.POST.get("is_competition"),
+        is_exercise=request.POST.get("is_exercise"),
+    )
+    activity.save()
+    return HttpResponse()
 
 
 # class WorkoutListView(generics.ListAPIView):
 #     queryset = Workouts.objects.prefetch_related("exercises")
 #     serializer_class = WorkoutSeializer
 def add_exercise(exercise_list, workout_id):
-    # response = [str(Exercises.objects.get(pk=1))]
     for exercise in exercise_list:
-        # print(exercise)
         Exercises(
             weight=exercise["weight"],
             reps=exercise["reps"],
@@ -225,11 +209,19 @@ def return_activities():
 
 
 @api_view(["GET"])
+@permission_classes([IsAdminUser])
+def return_all_activities(request):
+    activities = return_activities()
+    serializer = ActivitySerializer(activities, many=True)
+    return JsonResponse({"activities": serializer.data})
+
+
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def return_exercise_activities(request):
-    activities = return_activities().filter(Q(is_exercise=True))
+    activities = return_activities().filter(Q(is_exercise=True)).order_by("name")
     serializer = ActivitySerializer(activities, many=True)
-    return JsonResponse({"response": serializer.data})
+    return JsonResponse({"exercises": serializer.data})
 
 
 def return_workouts_basic(request):

@@ -27,7 +27,7 @@ urlpatterns = [
     #     name="return_schedule_info",
     # ),
     path(
-        "return_news/",
+        "return_news",
         views.return_news,
         name="return_news",
     ),
@@ -56,15 +56,20 @@ urlpatterns = [
     #     views.add_news,
     #     name="add_news",
     # ),
-    # path(
-    #     "add_activity/",
-    #     views.add_activity,
-    #     name="add_activity",
-    # ),
     path(
-        "return_exercise_activities/",
+        "add_activity/",
+        views.add_activity,
+        name="add_activity",
+    ),
+    path(
+        "return_exercise_activities",
         views.return_exercise_activities,
         name="return_exercise_activities",
+    ),
+    path(
+        "return_all_activities",
+        views.return_all_activities,
+        name="return_all_activities",
     ),
     path("return_workouts/", views.return_workouts, name="return_workouts"),
     # path("return_workouts/", views.ReturnWorkouts.get, name="return_workouts"),

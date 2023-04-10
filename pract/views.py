@@ -282,8 +282,6 @@ def return_workout_years(request):
                 lambda d: d["year"],
                 list(
                     return_workouts_basic(request)
-                    .order_by()
-                    .values("year")
                     .distinct()
                     .values(
                         "year"
@@ -291,6 +289,9 @@ def return_workout_years(request):
                 ),
             )
         )
+        years.sort()
+        years.reverse()
+        print(years)
         # years.reverse()
         return JsonResponse({"years": years})
     except Workouts.DoesNotExist:

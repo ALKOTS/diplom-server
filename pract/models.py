@@ -10,7 +10,7 @@ from django.contrib.auth.models import (
 
 class Activities(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     beginner_friendly = models.BooleanField(default=False)
     crossfit = models.BooleanField(default=False)
     general_workout = models.BooleanField(default=False)
@@ -168,7 +168,7 @@ class Workouts(models.Model):
         db_table = "workouts"
 
     def __str__(self) -> str:
-        return self.name
+        return str(self.name)
 
 
 class Exercises(models.Model):

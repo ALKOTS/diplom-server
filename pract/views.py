@@ -1,7 +1,8 @@
 from django.shortcuts import render
+import json
 from django.http import JsonResponse, HttpResponse
 from django.core import serializers
-from rest_framework import generics, authentication
+from rest_framework import generics, authentication, filters
 from rest_framework.permissions import (
     BasePermission,
     AllowAny,
@@ -168,7 +169,11 @@ def add_activity(request):
 #     queryset = Workouts.objects.prefetch_related("exercises")
 #     serializer_class = WorkoutSeializer
 def add_exercise(exercise_list, workout_id):
+    # exercise_list = json.loads(exercise_list)
+    # print(exercise_list)
+
     for exercise in exercise_list:
+        # print(exercise)
         Exercises(
             weight=exercise["weight"],
             reps=exercise["reps"],
@@ -182,7 +187,7 @@ def add_exercise(exercise_list, workout_id):
 @permission_classes([IsAuthenticated])
 def add_workout(request):
     # print(request.data)
-    year, month, day = request.data["date"].split("/")
+    year, month, day = request.data["date"].split(" ")
     workout = Workouts(
         user=request.user,
         name=request.data["name"],
@@ -224,6 +229,15 @@ def return_exercise_activities(request):
     return JsonResponse({"exercises": serializer.data})
 
 
+class ActivitiesAPIView(generics.ListCreateAPIView):
+    api_view = ["GET"]
+    permission_classes = [IsAuthenticated]
+    search_fields = ["name"]
+    filter_backends = (filters.SearchFilter,)
+    queryset = return_activities().filter(Q(is_exercise=True)).order_by("name")
+    serializer_class = ActivitySerializer
+
+
 def return_workouts_basic(request):
     workouts = Workouts.objects.filter(user=request.user)
     return workouts
@@ -237,7 +251,6 @@ def return_selected_workouts(request, year, month):
             workouts = (
                 return_workouts_basic(request)
                 .filter(Q(year=year) & Q(month=month))
-                # Workouts.objects.filter(Q(year=year) & Q(month=month))
                 .order_by("year")
                 .order_by("month")
                 .order_by("day")

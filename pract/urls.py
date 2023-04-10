@@ -67,6 +67,11 @@ urlpatterns = [
         name="return_exercise_activities",
     ),
     path(
+        "return_searched_exercise_activities",
+        views.ActivitiesAPIView.as_view(),
+        name="return_searched_exercise_activities",
+    ),
+    path(
         "return_all_activities",
         views.return_all_activities,
         name="return_all_activities",

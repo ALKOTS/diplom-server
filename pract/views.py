@@ -19,6 +19,7 @@ from pract.serializers import (
     ActivitySerializer,
     NewsSerializer,
     RegistrationSerializer,
+    ScheduleSerializer,
 )
 from django.db.models import Q
 from rest_framework.response import Response
@@ -35,6 +36,8 @@ from pract.models import (
     Workouts,
     Exercises,
 )
+
+from datetime import date, timedelta
 
 # from models import get_clients
 
@@ -69,23 +72,43 @@ from pract.models import (
 #     return JsonResponse({"trainer": trainers})
 
 
-# def return_schedule_info(request):
-#     schedule = []
-#     for c in Schedule.objects.all():
-#         schedule.append(
-#             {
-#                 "name": c.name,
-#                 "date": c.date,
-#                 "people_limit": c.people_limit,
-#                 "leader": str(c.leader.name),
-#                 "activity": str(c.activity.name),
-#             }
-#         )
-#     return JsonResponse({"schedule": schedule})
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def return_schedule(request):
+    schedule = Schedule.objects.all()
+    serializer = ScheduleSerializer(schedule, many=True)
+    return JsonResponse({"schedule": serializer.data})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def return_schedule_week(request):
+    current_week, offset = (
+        date.fromisoformat(request.data["now"])
+        - timedelta(days=date.fromisoformat(request.data["now"]).weekday()),
+        request.data["offset"],
+    )
+
+    monday, next_monday = current_week + timedelta(
+        7 * offset
+    ), current_week + timedelta(7 * offset + 7)
+
+    print(monday, next_monday)
+    schedule = (
+        Schedule.objects.filter(date__range=[monday, next_monday])
+        .order_by("date")
+        .order_by("timeStart")
+    )
+    print(schedule)
+    serializer = ScheduleSerializer(schedule, many=True)
+
+    return JsonResponse(
+        {"schedule": serializer.data, "monday": monday, "next_monday": next_monday}
+    )
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def return_news(request):
     news = News.objects.all()
     serializer = NewsSerializer(news, many=True)
@@ -202,7 +225,7 @@ def add_workout(request):
         request.data["exercises"],
         workout.id,
     )
-    return HttpResponse()
+    return Response(data={"data": "Success"}, status=status.HTTP_200_OK)
 
 
 # Response(data={"response": workout.id}, status=status.HTTP_200_OK)

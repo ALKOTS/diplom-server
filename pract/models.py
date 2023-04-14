@@ -119,10 +119,13 @@ class Trainer(models.Model):
 
 
 class Schedule(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(blank=True, null=True, max_length=100)
-    date = models.DateField(blank=True, null=True)
-    people_limit = models.IntegerField(blank=True, null=True)
+    date = models.DateField(null=True)
+    timeStart = models.TimeField(null=True)
+    timeFinish = models.TimeField(null=True)
+    people_limit = models.IntegerField(default=20)
+    people_enlisted = models.IntegerField(default=0)
+    place = models.CharField(max_length=100, null=True)
+    is_free = models.BooleanField(default=False)
     leader = models.ForeignKey(
         Trainer,
         on_delete=models.SET_NULL,
@@ -132,6 +135,9 @@ class Schedule(models.Model):
     activity = models.ForeignKey(
         Activities, on_delete=models.CASCADE, to_field="id", default=1
     )
+
+    def __str__(self):
+        return str(self.activity)
 
     class Meta:
         managed = True

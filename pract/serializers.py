@@ -3,13 +3,27 @@ from django.contrib import admin
 
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin
-from pract.models import Workouts, Exercises, Activities, News, Clients
+from pract.models import (
+    Workouts,
+    Exercises,
+    Schedule,
+    Activities,
+    News,
+    Clients,
+    Trainer,
+)
 from django.core.validators import validate_email
 
 
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activities
+        fields = "__all__"
+
+
+class TrainerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trainer
         fields = "__all__"
 
 
@@ -32,6 +46,15 @@ class WorkoutSeializer(serializers.ModelSerializer):
 
     class Meta:
         model = Workouts
+        fields = "__all__"
+
+
+class ScheduleSerializer(serializers.ModelSerializer):
+    activity = ActivitySerializer(many=False)
+    leader = TrainerSerializer(many=False)
+
+    class Meta:
+        model = Schedule
         fields = "__all__"
 
 

@@ -21,11 +21,16 @@ urlpatterns = [
     #     views.return_trainer_info,
     #     name="return_trainer_info",
     # ),
-    # path(
-    #     "return_schedule_info/",
-    #     views.return_schedule_info,
-    #     name="return_schedule_info",
-    # ),
+    path(
+        "return_schedule_all",
+        views.return_schedule,
+        name="return_schedule",
+    ),
+    path(
+        "return_schedule",
+        views.return_schedule_week,
+        name="return_schedule_week",
+    ),
     path(
         "return_news",
         views.return_news,

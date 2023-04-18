@@ -11,6 +11,7 @@ from pract.models import (
     News,
     Clients,
     Trainer,
+    Appointments,
 )
 from django.core.validators import validate_email
 
@@ -55,6 +56,20 @@ class ScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Schedule
+        fields = "__all__"
+
+
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Clients
+        fields = ["username", "last_name", "email", "login"]
+
+
+class AppointmentsSerializer(serializers.ModelSerializer):
+    schedule_position = ScheduleSerializer(many=False)
+
+    class Meta:
+        model = Appointments
         fields = "__all__"
 
 

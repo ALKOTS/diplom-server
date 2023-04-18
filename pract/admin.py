@@ -8,6 +8,7 @@ from pract.models import (
     News,
     Exercises,
     Workouts,
+    Appointments,
 )
 from django.contrib.auth.models import (
     AbstractUser,
@@ -23,6 +24,7 @@ admin.site.register(Schedule),
 admin.site.register(News),
 admin.site.register(Exercises),
 admin.site.register(Workouts),
+admin.site.register(Appointments),
 # admin.site.register(Clients, UserAdmin)
 
 

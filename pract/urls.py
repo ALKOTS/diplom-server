@@ -10,6 +10,7 @@ urlpatterns = [
     path("login/", obtain_auth_token, name="obtain-auth-token"),
     path("register/", views.register, name="register"),
     path("add_workout/", views.add_workout, name="add_workout"),
+    path("remove_workout/", views.remove_workout, name="remove_workout"),
     # path("add_exercise/", views.add_exercise, name="add_exercise"),
     # path(
     #     "return_activities/",
@@ -21,6 +22,7 @@ urlpatterns = [
     #     views.return_trainer_info,
     #     name="return_trainer_info",
     # ),
+    path("return_client", views.return_client, name="return_client"),
     path(
         "return_schedule_all",
         views.return_schedule,
@@ -31,6 +33,7 @@ urlpatterns = [
         views.return_schedule_week,
         name="return_schedule_week",
     ),
+    path("return_appointments", views.return_appointments, name="return_appointments"),
     path(
         "return_news",
         views.return_news,

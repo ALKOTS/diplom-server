@@ -120,28 +120,49 @@ class Trainer(models.Model):
 
 class Schedule(models.Model):
     date = models.DateField(null=True)
-    timeStart = models.TimeField(null=True)
-    timeFinish = models.TimeField(null=True)
+    startTime = models.TimeField(null=True)
+    endTime = models.TimeField(null=True)
     people_limit = models.IntegerField(default=20)
     people_enlisted = models.IntegerField(default=0)
     place = models.CharField(max_length=100, null=True)
-    is_free = models.BooleanField(default=False)
+    # is_free = models.BooleanField(default=False)
+    price = models.IntegerField(default=0)
     leader = models.ForeignKey(
         Trainer,
         on_delete=models.SET_NULL,
         to_field="id",
         null=True,  # default=1
     )
+    description = models.CharField(null=True, max_length=1000)
     activity = models.ForeignKey(
         Activities, on_delete=models.CASCADE, to_field="id", default=1
     )
 
     def __str__(self):
-        return str(self.activity)
+        return str(str(self.activity) + " " + str(self.date))
 
     class Meta:
         managed = True
         db_table = "schedule"
+
+
+class Appointments(models.Model):
+    id = models.AutoField(primary_key=True)
+    # date = models.DateField(null=True)
+    # startTime = models.TimeField(null=True)
+    client = models.ForeignKey(
+        Clients, on_delete=models.CASCADE, to_field="id", default=1
+    )
+    schedule_position = models.ForeignKey(
+        Schedule, on_delete=models.CASCADE, to_field="id", default=1
+    )
+
+    class Meta:
+        managed = True
+        db_table = "appointments"
+
+    def __str__(self) -> str:
+        return str(self.client)
 
 
 class News(models.Model):
@@ -164,6 +185,8 @@ class Workouts(models.Model):
     year = models.IntegerField(default=2001, null=True)
     month = models.IntegerField(default=1, null=True)
     day = models.CharField(default=1, null=True, max_length=100)
+    startTime = models.TimeField(default="0:00:00")
+    endTime = models.TimeField(default="1:00:00")
     length = models.CharField(default=1, null=True, max_length=100)
     personal_highscores_amount = models.CharField(
         default=0, null=True, max_length=100
@@ -183,7 +206,7 @@ class Exercises(models.Model):
     reps = models.CharField(default=0, null=True, max_length=100)
     workout_id = models.ForeignKey(
         Workouts,
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         related_name="exercises",
     )
@@ -200,7 +223,7 @@ class Exercises(models.Model):
         db_table = "exercises"
 
     def __str__(self) -> str:
-        return str(self.activity)
+        return str(self.workout_id)
 
 
 # class AuthGroup(models.Model):

@@ -20,6 +20,8 @@ from pract.serializers import (
     NewsSerializer,
     RegistrationSerializer,
     ScheduleSerializer,
+    AppointmentsSerializer,
+    ClientSerializer,
 )
 from django.db.models import Q
 from rest_framework.response import Response
@@ -28,6 +30,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 
 from pract.models import (
+    Appointments,
     Clients,
     Activities,
     Schedule,
@@ -88,7 +91,7 @@ def return_schedule_week(request):
         - timedelta(days=date.fromisoformat(request.data["now"]).weekday()),
         request.data["offset"],
     )
-
+    print(offset)
     monday, next_monday = current_week + timedelta(
         7 * offset
     ), current_week + timedelta(7 * offset + 7)
@@ -97,7 +100,7 @@ def return_schedule_week(request):
     schedule = (
         Schedule.objects.filter(date__range=[monday, next_monday])
         .order_by("date")
-        .order_by("timeStart")
+        .order_by("startTime")
     )
     print(schedule)
     serializer = ScheduleSerializer(schedule, many=True)
@@ -124,6 +127,26 @@ def return_news_month(request, since):
     serializer = NewsSerializer(news, many=True)
 
     return JsonResponse({"news": serializer.data})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def return_appointments(request):
+    appointments = Appointments.objects.filter(
+        Q(client=request.user) & Q(schedule_position__date__gte=request.data["date"])
+    ).order_by("schedule_position__date")
+    serializer = AppointmentsSerializer(appointments, many=True)
+
+    return JsonResponse({"appointments": serializer.data})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def return_client(request):
+    client = Clients.objects.filter(login=request.user)
+    serializer = ClientSerializer(client, many=True)
+
+    return JsonResponse({"client": serializer.data})
 
 
 # def add_client(request):
@@ -217,7 +240,8 @@ def add_workout(request):
         year=year,
         month=month,
         day=day,
-        length=request.data["length"],
+        startTime=request.data["startTime"],
+        endTime=request.data["endTime"],
         personal_highscores_amount=0,
     )
     workout.save()
@@ -225,6 +249,13 @@ def add_workout(request):
         request.data["exercises"],
         workout.id,
     )
+    return Response(data={"data": "Success"}, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def remove_workout(request):
+    Workouts.objects.filter(id=request.data["id"]).delete()
     return Response(data={"data": "Success"}, status=status.HTTP_200_OK)
 
 

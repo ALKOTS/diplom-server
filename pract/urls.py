@@ -22,6 +22,11 @@ urlpatterns = [
     #     views.return_trainer_info,
     #     name="return_trainer_info",
     # ),
+    path(
+        "check_for_appointment",
+        views.check_for_appointment,
+        name="check_for_appointment",
+    ),
     path("return_client", views.return_client, name="return_client"),
     path(
         "return_schedule_all",

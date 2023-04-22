@@ -87,26 +87,34 @@ def return_schedule(request):
 @permission_classes([IsAuthenticated])
 def return_schedule_week(request):
     current_week, offset = (
-        date.fromisoformat(request.data["now"])
-        - timedelta(days=date.fromisoformat(request.data["now"]).weekday()),
+        date.fromisoformat(request.data["now"]),
+        # - timedelta(days=date.fromisoformat(request.data["now"]).weekday()),
         request.data["offset"],
     )
     print(offset)
-    monday, next_monday = current_week + timedelta(
+    weekday, next_weekday = current_week + timedelta(
         7 * offset
     ), current_week + timedelta(7 * offset + 7)
 
-    print(monday, next_monday)
+    print(weekday, next_weekday)
     schedule = (
-        Schedule.objects.filter(date__range=[monday, next_monday])
+        Schedule.objects.filter(date__range=[weekday, next_weekday])
         .order_by("date")
         .order_by("startTime")
     )
     print(schedule)
+
+    # ss = []
+    # for c in Appointments.objects.filter(
+    #     Q(client=request.user) & Q(schedule_position__date__gte=weekday)
+    # ).only("schedule_position"):
+    #     ss.append(ScheduleSerializer(c.schedule_position)["id"].value)
+
+    # print(ss)
     serializer = ScheduleSerializer(schedule, many=True)
 
     return JsonResponse(
-        {"schedule": serializer.data, "monday": monday, "next_monday": next_monday}
+        {"schedule": serializer.data, "weekday": weekday, "next_weekday": next_weekday}
     )
 
 
@@ -116,6 +124,18 @@ def return_news(request):
     news = News.objects.all()
     serializer = NewsSerializer(news, many=True)
     return JsonResponse({"news": serializer.data})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def check_for_appointment(request):
+    return JsonResponse(
+        {
+            "enrolled": Appointments.objects.filter(
+                Q(client=request.user) & Q(schedule_position__id=request.data["id"])
+            ).count()
+        }
+    )  # AppointmentsSerializer(ss, many=True).data})
 
 
 @api_view(["GET"])

@@ -148,8 +148,6 @@ class Schedule(models.Model):
 
 class Appointments(models.Model):
     id = models.AutoField(primary_key=True)
-    # date = models.DateField(null=True)
-    # startTime = models.TimeField(null=True)
     client = models.ForeignKey(
         Clients, on_delete=models.CASCADE, to_field="id", default=1
     )

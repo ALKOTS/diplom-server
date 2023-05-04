@@ -80,8 +80,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def save(self):
-        # client = Clients(email=self.validated_data["email"])
-        password = self.validated_data["password"]  # .pop("password")
+        password = self.validated_data["password"]
         client = Clients(**self.validated_data)
         client.set_password(password)
         client.save()

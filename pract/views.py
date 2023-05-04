@@ -42,38 +42,6 @@ from pract.models import (
 
 from datetime import date, timedelta
 
-# from models import get_clients
-
-# Create your views here.
-# def return_client_info(request):
-#     clients = []
-#     # Clients.objects.raw("SELECT * FROM clients", translations=name_map)
-#     for c in Clients.objects.raw("SELECT * FROM clients"):
-#         clients.append(
-#             {"name": c.name, "last_name": c.last_name, "password": c.password}
-#         )
-
-#     return JsonResponse({"client": clients})
-
-
-# def return_activities(request):
-#     activities = Activities.objects.all()
-#     serializer = ActivitySerializer(activities, many=True)
-#     return JsonResponse(serializer.data, safe=False)
-
-
-# def return_trainer_info(request):
-#     trainers = []
-#     for c in Trainer.objects.all():
-#         trainers.append(
-#             {
-#                 "id": c.id,
-#                 "name": c.name,
-#             }
-#         )
-
-#     return JsonResponse({"trainer": trainers})
-
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
@@ -88,29 +56,18 @@ def return_schedule(request):
 def return_schedule_week(request):
     current_week, offset = (
         date.fromisoformat(request.data["now"]),
-        # - timedelta(days=date.fromisoformat(request.data["now"]).weekday()),
         request.data["offset"],
     )
-    print(offset)
     weekday, next_weekday = current_week + timedelta(
         7 * offset
-    ), current_week + timedelta(7 * offset + 7)
+    ), current_week + timedelta(7 * offset + 14)
 
-    print(weekday, next_weekday)
     schedule = (
         Schedule.objects.filter(date__range=[weekday, next_weekday])
         .order_by("date")
         .order_by("startTime")
     )
-    print(schedule)
 
-    # ss = []
-    # for c in Appointments.objects.filter(
-    #     Q(client=request.user) & Q(schedule_position__date__gte=weekday)
-    # ).only("schedule_position"):
-    #     ss.append(ScheduleSerializer(c.schedule_position)["id"].value)
-
-    # print(ss)
     serializer = ScheduleSerializer(schedule, many=True)
 
     return JsonResponse(
@@ -135,17 +92,16 @@ def check_for_appointment(request):
                 Q(client=request.user) & Q(schedule_position__id=request.data["id"])
             ).count()
         }
-    )  # AppointmentsSerializer(ss, many=True).data})
+    )
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def return_news_month(request, since):
-    print(since)
-
-    news = News.objects.order_by("-id")[since : since + 10 : 1]
+    news = News.objects.order_by("-id")[
+        since : since + 10 : 1
+    ]  # News.objects.order_by("id").order_by("-date")[since : since + 10 : 1]  #
     serializer = NewsSerializer(news, many=True)
-
     return JsonResponse({"news": serializer.data})
 
 
@@ -167,46 +123,6 @@ def return_client(request):
     serializer = ClientSerializer(client, many=True)
 
     return JsonResponse({"client": serializer.data})
-
-
-# def add_client(request):
-#     client = Clients(
-#         name=request.POST["name"],
-#         last_name=request.POST["last_name"],
-#         password=request.POST["password"],
-#     )
-#     client.save()
-#     return HttpResponse()
-
-
-# def add_schedule(request):
-#     schedule = Schedule(
-#         name=request.POST["name"],
-#         date=request.POST["date"],
-#         people_limit=request.POST["people_limit"],
-#         leader=Trainer.objects.get(id=request.POST["leader"]),
-#         activity=Activities.objects.get(id=request.POST["activity"]),
-#     )
-#     schedule.save()
-#     return HttpResponse()
-
-
-# def add_news(request):
-#     news = News(
-#         title=request.POST["title"],
-#         sub_title=request.POST["sub_title"],
-#         text=request.POST["text"],
-#         date=request.POST["date"],
-#         post_url=request.POST["post_url"],
-#     )
-#     news.save()
-#     return HttpResponse()
-
-
-# def add_trainer(request):
-#     trainer = Trainer(name=request.POST["name"])
-#     trainer.save()
-#     return HttpResponse()
 
 
 @api_view(["POST"])
@@ -231,15 +147,8 @@ def add_activity(request):
     return HttpResponse()
 
 
-# class WorkoutListView(generics.ListAPIView):
-#     queryset = Workouts.objects.prefetch_related("exercises")
-#     serializer_class = WorkoutSeializer
 def add_exercise(exercise_list, workout_id):
-    # exercise_list = json.loads(exercise_list)
-    # print(exercise_list)
-
     for exercise in exercise_list:
-        # print(exercise)
         Exercises(
             weight=exercise["weight"],
             reps=exercise["reps"],
@@ -252,7 +161,6 @@ def add_exercise(exercise_list, workout_id):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def add_workout(request):
-    # print(request.data)
     year, month, day = request.data["date"].split(" ")
     workout = Workouts(
         user=request.user,
@@ -277,9 +185,6 @@ def add_workout(request):
 def remove_workout(request):
     Workouts.objects.filter(id=request.data["id"]).delete()
     return Response(data={"data": "Success"}, status=status.HTTP_200_OK)
-
-
-# Response(data={"response": workout.id}, status=status.HTTP_200_OK)
 
 
 def return_activities():
@@ -334,15 +239,11 @@ def return_selected_workouts(request, year, month):
         except Workouts.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        # workouts = Workouts.objects.all()
-
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def return_workouts(request):
-    # workouts = Workouts.objects.filter(user=request.user)
-    # print(request.user)
-    workouts = return_workouts_basic(request)  # Workouts.objects.all()
+    workouts = return_workouts_basic(request)
     serializer = WorkoutSeializer(workouts, many=True)
     return JsonResponse(serializer.data, safe=False)
 
@@ -354,19 +255,12 @@ def return_workout_years(request):
         years = list(
             map(
                 lambda d: d["year"],
-                list(
-                    return_workouts_basic(request)
-                    .distinct()
-                    .values(
-                        "year"
-                    )  # Workouts.objects.order_by().values("year").distinct().values("year")
-                ),
+                list(return_workouts_basic(request).distinct().values("year")),
             )
         )
         years.sort()
         years.reverse()
         print(years)
-        # years.reverse()
         return JsonResponse({"years": years})
     except Workouts.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -380,7 +274,7 @@ def return_workout_months(request, year):
             lambda d: d["month"],
             list(
                 return_workouts_basic(request)
-                .filter(Q(year=year))  # Workouts.objects.filter(Q(year=year))
+                .filter(Q(year=year))
                 .order_by("month")
                 .distinct()
                 .values("month")
@@ -405,5 +299,3 @@ def register(request):
 
     print(data)
     return Response(data, status=status.HTTP_200_OK)
-
-    # return Response(status=status.HTTP_200_OK)

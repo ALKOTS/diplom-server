@@ -68,10 +68,22 @@ def return_schedule_week(request):
         .order_by("startTime")
     )
 
+    people_enlisted = {}
+    for s in schedule:
+        people_enlisted[schedule[0].id] = Appointments.objects.filter(
+            schedule_position_id=s.id
+        ).count()
+    # people_enlisted = list(Appointments.objects.filter(schedule_position=))
+    # print(people_enlisted)
     serializer = ScheduleSerializer(schedule, many=True)
 
     return JsonResponse(
-        {"schedule": serializer.data, "weekday": weekday, "next_weekday": next_weekday}
+        {
+            "schedule": serializer.data,
+            "weekday": weekday,
+            "next_weekday": next_weekday,
+            "people_enlisted": people_enlisted,
+        }
     )
 
 

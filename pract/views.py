@@ -70,7 +70,7 @@ def return_schedule_week(request):
 
     people_enlisted = {}
     for s in schedule:
-        people_enlisted[schedule[0].id] = Appointments.objects.filter(
+        people_enlisted[s.id] = Appointments.objects.filter(
             schedule_position_id=s.id
         ).count()
     # people_enlisted = list(Appointments.objects.filter(schedule_position=))
@@ -311,3 +311,22 @@ def register(request):
 
     print(data)
     return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def enroll(request):
+    if request.data["enrolled"]:
+        Appointments.objects.filter(
+            Q(client=request.user)
+            & Q(schedule_position_id=request.data["schedule_position"])
+        ).delete()
+    else:
+        appointment = Appointments(
+            client=request.user,
+            schedule_position=Schedule.objects.get(
+                id=request.data["schedule_position"]
+            ),
+        )
+        appointment.save()
+    return Response(data={"data": "Success"}, status=status.HTTP_200_OK)

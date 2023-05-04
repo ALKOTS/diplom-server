@@ -11,6 +11,7 @@ urlpatterns = [
     path("register/", views.register, name="register"),
     path("add_workout/", views.add_workout, name="add_workout"),
     path("remove_workout/", views.remove_workout, name="remove_workout"),
+    path("enroll/", views.enroll, name="enroll"),
     # path("add_exercise/", views.add_exercise, name="add_exercise"),
     # path(
     #     "return_activities/",
